@@ -1,0 +1,13 @@
+title: "mtDNA Foundation Model — Dev Log"
+description: >-
+  Building the first dedicated foundation model for mitochondrial DNA.
+  Circular architecture, heteroplasmy-aware embeddings, pre-trained on 155k sequences.
+url: "https://vthawfeek.github.io"
+baseurl: ""
+author:
+  name: "Thawfeek Varusai"
+  email: "thawfeek.varusai@biorelate.com"
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
