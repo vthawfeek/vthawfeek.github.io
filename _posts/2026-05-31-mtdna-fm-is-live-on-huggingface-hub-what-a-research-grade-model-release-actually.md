@@ -13,7 +13,7 @@ This is part of an open-source project to build the first dedicated foundation m
 
 The base model is 44.6 MB. The haplogroup classification adapter is 400 KB. The pathogenicity adapter is 203 KB.
 
-That ratio matters. The haplogroup adapter has `r=8`, which means LoRA injects rank-8 low-rank matrices into the query, key, value, and dense layers of each attention block. Total trainable parameters: about 500K out of 5.8M. The pathogenicity adapter has `r=4` (half the rank, half the size) because the training dataset is smaller and heavier regularisation is needed.
+That ratio matters. The haplogroup adapter has `r=8`, which means LoRA injects rank-8 low-rank matrices into the query, key, value, and dense layers of each attention block. Total trainable parameters: about 500K out of 6.9M (full model with MLM head). The pathogenicity adapter has `r=4` (half the rank, half the size) because the training dataset is smaller and heavier regularisation is needed.
 
 The practical consequence: if you fine-tune a new downstream task from this base model, you get a 203-400 KB artefact that users download on top of the 44.6 MB base they already have. You can update, retrain, or replace an adapter without redistributing the base. For a research group that wants to share a haplogroup classifier trained on their own in-house cohort data, this is the right deployment pattern.
 
@@ -56,10 +56,10 @@ The correct loading path is through the concrete class:
 from mtdna_fm.model.model import MtDNAForMaskedModeling
 
 model = MtDNAForMaskedModeling.from_pretrained("vthawfeek/mtdna-foundation-model")
-# 5,790,720 parameters — loads correctly
+# 6,907,393 parameters (encoder + MLM head) — loads correctly
 ```
 
-The verification script confirmed this works. The model loads all 113 weight tensors from the Hub and reproduces the correct parameter count (5.8M). The AutoConfig warning is documented in the model card limitations section rather than silently ignored.
+The verification script confirmed this works. The model loads all 113 weight tensors from the Hub and reproduces the correct parameter count (6.9M full model; the encoder alone is ~5.8M). The AutoConfig warning is documented in the model card limitations section rather than silently ignored.
 
 ## The Model Card as Documentation
 
