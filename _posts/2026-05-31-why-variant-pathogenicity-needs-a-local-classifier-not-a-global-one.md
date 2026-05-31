@@ -44,13 +44,13 @@ The variants are stratified by type at split time: missense, tRNA, rRNA, D-loop.
 
 ## LoRA configuration and why it differs from haplogroup
 
-Haplogroup fine-tuning uses LoRA r=8. Pathogenicity uses r=4. The reason is dataset size. Haplogroup fine-tuning has 47,000 full genomes. Pathogenicity has 7,000 variant windows. With r=4, the LoRA adapter has 4 times fewer free parameters than r=8. Reducing capacity is the right move when the training set is small.
+Haplogroup fine-tuning uses LoRA r=8. Pathogenicity uses r=4. The reason is dataset size. Haplogroup fine-tuning has 34,974 human sequences. Pathogenicity has 7,000 variant windows. With r=4, the LoRA adapter has 4 times fewer free parameters than r=8. Reducing capacity is the right move when the training set is small.
 
 Weight decay is also heavier: 0.1 for pathogenicity vs 0.01 for haplogroup. This is standard practice for small-dataset fine-tuning. The L2 penalty on the LoRA matrices keeps them from growing large enough to memorise training variants.
 
-Expected AUROC: above 0.85. The pre-trained encoder has seen all 30,000 vertebrate mtDNA genomes during Phase 1. Positions that are pathogenic in humans are often conserved across species precisely because they are functionally important. The cross-species corpus teaches the model which positions tolerate change and which do not, before any disease labels appear.
+Expected AUROC: above 0.85. The pre-trained encoder has seen all ~117,500 vertebrate mtDNA genomes during Phase 1. Positions that are pathogenic in humans are often conserved across species precisely because they are functionally important. The cross-species corpus teaches the model which positions tolerate change and which do not, before any disease labels appear.
 
-![Shannon entropy per genomic position, showing the D-loop (positions 576-16024) is 7x more variable than protein-coding regions. Conserved positions in coding genes align with known pathogenic variant hotspots.](http://rokpayprsizors.files.wordpress.com/2026/05/positional_entropy-2.png)
+![Shannon entropy per genomic position, showing the D-loop (positions 576-16024) is 7x more variable than protein-coding regions. Conserved positions in coding genes align with known pathogenic variant hotspots.](http://rokpayprsizors.files.wordpress.com/2026/05/positional_entropy-4.png)
 
 The entropy figure illustrates the signal the pre-trained model has already learned: conserved positions (low entropy) are where pathogenic variants cluster. The fine-tuning head learns to convert that pre-trained structural knowledge into explicit pathogenicity probabilities.
 
@@ -76,7 +76,7 @@ Total test count: 274 (was 264 after Day 16).
 
 - For pathogenicity prediction, the variant-position token hidden state is more informative than CLS because pathogenicity is a local property: the effect of a substitution on a specific codon or tRNA stem, not on the genome as a whole.
 - `pos_weight=2.5` in `BCEWithLogitsLoss` compensates for a 1:2.5 ClinVar/gnomAD class imbalance and encodes the domain asymmetry that missing a real pathogenic variant is more costly than a false alarm.
-- LoRA rank selection should scale with dataset size: r=4 for 7k variant windows vs r=8 for 47k full genomes. Smaller rank reduces adapter capacity to match available training signal.
-- Cross-species pre-training implicitly encodes functional constraint: positions conserved across 30k vertebrate genomes are exactly where pathogenic human variants cluster. The fine-tuning head converts that pre-learned signal into probabilities.
+- LoRA rank selection should scale with dataset size: r=4 for 7k variant windows vs r=8 for 35k full genomes. Smaller rank reduces adapter capacity to match available training signal.
+- Cross-species pre-training implicitly encodes functional constraint: positions conserved across ~117k vertebrate genomes are exactly where pathogenic human variants cluster. The fine-tuning head converts that pre-learned signal into probabilities.
 
 [GitHub repo: https://github.com/vthawfeek/mtdna-foundation-model]
