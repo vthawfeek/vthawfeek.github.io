@@ -104,7 +104,7 @@ class MtDNACircularPositionalEncoding(nn.Module):
 
 The buffer is 16,569 × 256 = 4.2M floats. At fp32 that is 16.8 MB, a bit large for a 24 MB model. But it is never updated by the optimizer, so it costs nothing in gradient computation. And because it is registered as a buffer, it is saved with the model and loaded automatically: `MtDNAModel.from_pretrained("models/phase1_v1")` loads the pre-computed PE table.
 
-![Per-position k-mer entropy in the first 256 bp of the mtDNA genome, showing the elevated diversity in the D-loop (positions 0-256) relative to the start of the tRNA gene cluster. The 7x entropy difference between D-loop and coding region motivates the circular PE: the D-loop junction region at positions 16,024-16,569 and positions 0-576 needs to be treated as spatially contiguous.](http://rokpayprsizors.files.wordpress.com/2026/05/positional_entropy_kmer-1.png)
+![Per-position k-mer entropy in the first 256 bp of the mtDNA genome, showing the elevated diversity in the D-loop (positions 0-256) relative to the start of the tRNA gene cluster. The 7x entropy difference between D-loop and coding region motivates the circular PE: the D-loop junction region at positions 16,024-16,569 and positions 0-576 needs to be treated as spatially contiguous.](http://rokpayprsizors.files.wordpress.com/2026/05/positional_entropy_kmer-2.png)
 
 ## The Heteroplasmy Channel: Continuous, Not Discretized
 
@@ -148,7 +148,7 @@ where `het_weight=0.3` in Phase 2 and `het_weight=0.0` in Phase 1. The heteropla
 
 ## What Phase 2 Adds to Phase 1
 
-Phase 1 pre-training uses 30k vertebrate mtDNA sequences across 3,500 species. Het_weight is 0 because non-human genomes don't have gnomAD heteroplasmy measurements. The model learns general mitochondrial sequence structure: codon usage patterns, tRNA stem-loop motifs, conserved protein-coding regions.
+Phase 1 pre-training uses ~117k vertebrate mtDNA sequences across 3,500+ species. Het_weight is 0 because non-human genomes don't have gnomAD heteroplasmy measurements. The model learns general mitochondrial sequence structure: codon usage patterns, tRNA stem-loop motifs, conserved protein-coding regions.
 
 Phase 2 starts from the Phase 1 checkpoint and continues on 34,974 human HmtDB sequences with het_weight=0.3. The learning rate drops from 1e-4 to 3e-5 (lower: the model is adjusting, not learning from scratch) with only 500 warmup steps (faster: the optimizer isn't starting cold).
 
