@@ -1,7 +1,7 @@
 ---
 title: "I Checked Whether Existing DNA Models Could Handle Mitochondrial DNA. Here's the Problem."
 date: 2026-06-06
-tags: [mtDNA, foundation model, bioinformatics]
+tags: [mtDNA, foundation model, bioinformatics, DNABERT2, HyenaDNA, Nucleotide Transformer]
 layout: post
 ---
 
@@ -23,7 +23,7 @@ All three models also accept a single discrete base (or k-mer) at each position.
 
 Mitochondrial DNA is different on all of these axes simultaneously.
 
-![mtDNA vs nDNA: circular junction at positions 1/16,569 with heteroplasmy illustration (mutant and wild-type copies), and base composition profiles showing mtDNA's non-uniform 44% GC vs nDNA's uniform 41% GC.](http://rokpayprsizors.files.wordpress.com/2026/06/t2_image-1.png)
+![mtDNA vs nDNA: circular junction at positions 1/16,569 with heteroplasmy illustration (mutant and wild-type copies), and base composition profiles showing mtDNA's non-uniform 44% GC vs nDNA's uniform 41% GC.](http://rokpayprsizors.files.wordpress.com/2026/06/t2_image-2.png)
 
 ---
 
@@ -35,7 +35,7 @@ For a model using linear positional encoding, position 0 and position 16,568 are
 
 The D-loop control region sits directly at this junction. The D-loop spans approximately positions 576 to 16,024, wrapping across the position-1/position-16,569 boundary. Both promoters for transcription and the origin of heavy-strand replication are in this region. The functional unit straddles the place where linearisation creates a gap.
 
-![Linear PE (left) treats positions 1 and 16,569 as maximally dissimilar (blue corner). Circular PE (right) correctly represents them as adjacent (red corner). The D-loop spans precisely this junction.](http://rokpayprsizors.files.wordpress.com/2026/06/pe_comparison-3.png)
+![Linear PE (left) treats positions 1 and 16,569 as maximally dissimilar (blue corner). Circular PE (right) correctly represents them as adjacent (red corner). The D-loop spans precisely this junction.](http://rokpayprsizors.files.wordpress.com/2026/06/pe_comparison-5.png)
 
 What this means for attention: in the pre-trained representations, attention heads that learn to focus on functionally related positions in the D-loop would need to attend across the full sequence length. Sequence 1 (position 576) and sequence 2 (position 16,024) look like they are separated by most of the genome, when they are actually adjacent regulatory elements. The attention pattern for the D-loop region would be structurally incorrect in any model with linear positional encoding.
 
