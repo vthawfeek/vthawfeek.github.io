@@ -11,7 +11,7 @@ This sounds like a minor structural detail. It is not. It is one of the first th
 
 ---
 
-![Three key challenges that make mitochondrial DNA require a purpose-built architecture: circular topology (the D-loop spans the linearisation break at position 16,569/1), heteroplasmy (continuous per-position allele fractions with clinical consequences), and information density (deep phylogenetic structure without recombination).](http://rokpayprsizors.files.wordpress.com/2026/06/t1_image-1.png)
+![Three key challenges that make mitochondrial DNA require a purpose-built architecture: circular topology (the D-loop spans the linearisation break at position 16,569/1), heteroplasmy (continuous per-position allele fractions with clinical consequences), and information density (deep phylogenetic structure without recombination).](http://rokpayprsizors.files.wordpress.com/2026/06/t1_image-2.png)
 
 ## The circular topology problem
 
@@ -23,7 +23,7 @@ The D-loop control region makes the topology problem concrete. The D-loop spans 
 
 I measured entropy across 47,000 human mitochondrial sequences from HmtDB. The D-loop region shows approximately 7x higher per-position entropy than protein-coding regions. It is where most haplogroup-defining variation sits. It is also where any linear model would introduce a discontinuity.
 
-![Per-position sequence entropy across the human mitochondrial genome. The D-loop (positions ~576-16,024, wrapping through the junction) shows dramatically higher variability than protein-coding regions.](http://rokpayprsizors.files.wordpress.com/2026/06/positional_entropy-2.png)
+![Per-position sequence entropy across the human mitochondrial genome. The D-loop (positions ~576-16,024, wrapping through the junction) shows dramatically higher variability than protein-coding regions.](http://rokpayprsizors.files.wordpress.com/2026/06/positional_entropy-3.png)
 
 Standard transformer positional encoding places positions 0 and 16,568 as maximally distant in embedding space. DNABERT2, HyenaDNA, Nucleotide Transformer: all three use linear positional encoding. None of them have a mechanism to represent the fact that these positions are physically adjacent and functionally connected through a shared regulatory element.
 
@@ -53,7 +53,7 @@ This has a consequence for the sequence data. Mutations accumulate in mtDNA at a
 
 For a foundation model, this structure is a pre-training signal. The sequences carry explicit phylogenetic information. If the model learns good representations, haplogroup separation should emerge zero-shot before any fine-tuning. I tested this: zero-shot k-NN classification on the pre-trained encoder reaches approximately 50% accuracy on a 26-class haplogroup task, against a random baseline of 3.8%. The pre-training signal is real.
 
-![Haplogroup distribution in the HmtDB training corpus. European haplogroups (H, HV, J, T, U) are heavily overrepresented.](http://rokpayprsizors.files.wordpress.com/2026/06/haplogroup_distribution-2.png)
+![Haplogroup distribution in the HmtDB training corpus. European haplogroups (H, HV, J, T, U) are heavily overrepresented.](http://rokpayprsizors.files.wordpress.com/2026/06/haplogroup_distribution-3.png)
 
 But the dataset structure is non-trivial. The HmtDB corpus of approximately 47,000 human sequences is 60-70% European. Haplogroup H alone represents roughly 40-45% of European populations. A model trained naively on this corpus will have dense, well-separated representations for H, HV, J, and T, and sparse representations for the L clades and the Asian-specific lineages. Haplogroup balance is a genuine concern for any downstream application in population genetics or clinical genetics outside European ancestry groups.
 
