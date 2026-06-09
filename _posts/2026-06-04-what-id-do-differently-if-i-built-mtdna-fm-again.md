@@ -1,7 +1,7 @@
 ---
 title: "What I'd Do Differently If I Built mtDNA-FM Again"
-date: 2026-06-04
-tags: [mtDNA, foundation model, bioinformatics, machine learning, BERT]
+date: 2026-06-09
+tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
 
@@ -115,3 +115,4 @@ The execution gaps are all fixable: GPU compute for fine-tuning, stratified samp
 
 *Code and pre-trained weights: [github.com/vthawfeek/mtdna-foundation-model](https://github.com/vthawfeek/mtdna-foundation-model)*
 *Weights on HuggingFace: [vthawfeek/mtdna-foundation-model](https://huggingface.co/vthawfeek/mtdna-foundation-model)*
+<!-- published: https://rokpayprsizors.wordpress.com/2026/06/04/what-id-do-differently-if-i-built-mtdna-fm-again/ -->
