@@ -1,7 +1,7 @@
 ---
 title: "This Genome Has 16,569 Base Pairs and Runs on Different Rules"
-date: 2026-06-05
-tags: [mtDNA, foundation model, bioinformatics, machine learning, BERT]
+date: 2026-06-09
+tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
 
@@ -11,7 +11,7 @@ This sounds like a minor structural detail. It is not. It is one of the first th
 
 ---
 
-![Three key challenges that make mitochondrial DNA require a purpose-built architecture: circular topology (the D-loop spans the linearisation break at position 16,569/1), heteroplasmy (continuous per-position allele fractions with clinical consequences), and information density (deep phylogenetic structure without recombination).](http://rokpayprsizors.files.wordpress.com/2026/06/t1_image.png)
+![Three key challenges that make mitochondrial DNA require a purpose-built architecture: circular topology (the D-loop spans the linearisation break at position 16,569/1), heteroplasmy (continuous per-position allele fractions with clinical consequences), and information density (deep phylogenetic structure without recombination).](http://rokpayprsizors.files.wordpress.com/2026/06/t1_image-5.png?w=1200)
 
 ## The circular topology problem
 
@@ -23,7 +23,7 @@ The D-loop control region makes the topology problem concrete. The D-loop spans 
 
 I measured entropy across 47,000 human mitochondrial sequences from HmtDB. The D-loop region shows approximately 7x higher per-position entropy than protein-coding regions. It is where most haplogroup-defining variation sits. It is also where any linear model would introduce a discontinuity.
 
-![Per-position sequence entropy across the human mitochondrial genome. The D-loop (positions ~576-16,024, wrapping through the junction) shows dramatically higher variability than protein-coding regions.](http://rokpayprsizors.files.wordpress.com/2026/06/positional_entropy-1.png)
+![Per-position sequence entropy across the human mitochondrial genome. The D-loop (positions ~576-16,024, wrapping through the junction) shows dramatically higher variability than protein-coding regions.](http://rokpayprsizors.files.wordpress.com/2026/06/positional_entropy-6.png?w=1200)
 
 Standard transformer positional encoding places positions 0 and 16,568 as maximally distant in embedding space. DNABERT2, HyenaDNA, Nucleotide Transformer: all three use linear positional encoding. None of them have a mechanism to represent the fact that these positions are physically adjacent and functionally connected through a shared regulatory element.
 
@@ -53,7 +53,7 @@ This has a consequence for the sequence data. Mutations accumulate in mtDNA at a
 
 For a foundation model, this structure is a pre-training signal. The sequences carry explicit phylogenetic information. If the model learns good representations, haplogroup separation should emerge zero-shot before any fine-tuning. I tested this: zero-shot k-NN classification on the pre-trained encoder reaches approximately 50% accuracy on a 26-class haplogroup task, against a random baseline of 3.8%. The pre-training signal is real.
 
-![Haplogroup distribution in the HmtDB training corpus. European haplogroups (H, HV, J, T, U) are heavily overrepresented.](http://rokpayprsizors.files.wordpress.com/2026/06/haplogroup_distribution-1.png)
+![Haplogroup distribution in the HmtDB training corpus. European haplogroups (H, HV, J, T, U) are heavily overrepresented.](http://rokpayprsizors.files.wordpress.com/2026/06/haplogroup_distribution-6.png?w=1200)
 
 But the dataset structure is non-trivial. The HmtDB corpus of approximately 47,000 human sequences is 60-70% European. Haplogroup H alone represents roughly 40-45% of European populations. A model trained naively on this corpus will have dense, well-separated representations for H, HV, J, and T, and sparse representations for the L clades and the Asian-specific lineages. Haplogroup balance is a genuine concern for any downstream application in population genetics or clinical genetics outside European ancestry groups.
 
@@ -78,4 +78,4 @@ A 6-layer BERT encoder with circular positional encoding, a heteroplasmy input c
 The pre-training is running. The architecture is working. The zero-shot results are not zero.
 
 Next: I want to understand whether the existing model landscape could handle this at all, or whether the problems I described above are genuinely architecture-level failures rather than training-data problems. That analysis is in the next post.
-<!-- published: https://rokpayprsizors.wordpress.com/2026/06/04/this-genome-has-16569-base-pairs-and-runs-on-different-rules/ -->
+<!-- published: https://rokpayprsizors.wordpress.com/2026/06/06/this-genome-has-16569-base-pairs-and-runs-on-different-rules/ -->
