@@ -15,7 +15,7 @@ mtDNA-FM is a 6-layer BERT encoder, 8 attention heads, 256 hidden dimensions, ap
 
 But three structural choices make it different from anything I could have downloaded off the shelf. None of them were obvious upfront.
 
-![mtDNA-FM architecture: 6-layer BERT encoder with circular positional encoding and heteroplasmy projection channel.](http://rokpayprsizors.files.wordpress.com/2026/06/architecture-3.png)
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/architecture-5.png?w=1200" alt="mtDNA-FM architecture: 6-layer BERT encoder with circular positional encoding and heteroplasmy projection channel." style="max-width:100%;height:auto;" />
 
 ---
 
@@ -36,7 +36,7 @@ If you use standard sinusoidal PE on mtDNA, any attention head trying to model D
 
 The fix is one substitution. Replace the linear angle with a circular one. The difference shows clearly in the positional similarity matrix:
 
-![Linear PE (left) vs circular PE (right): cosine similarity heatmaps across all 16,569 positions. Red boxes mark the position 1/16,569 junction. Circular PE makes these positions similar; linear PE makes them maximally dissimilar.](http://rokpayprsizors.files.wordpress.com/2026/06/pe_comparison-9.png)
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/pe_comparison-13.png?w=1200" alt="Linear PE (left) vs circular PE (right): cosine similarity heatmaps across all 16,569 positions. Red boxes mark the position 1/16,569 junction. Circular PE makes these positions similar; linear PE makes them maximally dissimilar." style="max-width:100%;height:auto;" />
 
 
 ```python
@@ -135,7 +135,7 @@ The combination of circular PE, heteroplasmy channel, and 6-mer tokenization mea
 
 Starting from a random baseline of ln(4096) ≈ 8.32, the question is how far the loss drops, and whether the learned representations show meaningful structure, for example whether k-NN classifiers on the embeddings recover haplogroup labels without any supervision.
 
-![Attention heatmap at training step 0. Even before pre-training, the circular positional encoding creates structured attention patterns across the genome.](http://rokpayprsizors.files.wordpress.com/2026/06/attention_heatmap_step0-3.png)
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/attention_heatmap_step0-5.png?w=1200" alt="Attention heatmap at training step 0. Even before pre-training, the circular positional encoding creates structured attention patterns across the genome." style="max-width:100%;height:auto;" />
 
 The Phase 1 pre-training on 117,000 cross-species vertebrate mtDNA genomes builds broad representations of evolutionary conserved sequence patterns. Phase 2 on 35,000 human HmtDB genomes with het_weight=0.3 specializes those representations toward human-specific signal. The two-phase structure is the training strategy, which gets its own post.
 
