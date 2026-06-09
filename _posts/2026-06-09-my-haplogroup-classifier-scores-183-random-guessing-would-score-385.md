@@ -27,7 +27,7 @@ Below random is the signature of partial class collapse, not random noise. The m
 
 The confusion matrix is 26x26. Twenty-three of those rows are essentially empty, meaning none of those haplogroup classes were predicted at any meaningful frequency.
 
-![Haplogroup classification confusion matrix. 23 of 26 rows have near-zero diagonal entries, the signature of partial class collapse.](http://rokpayprsizors.files.wordpress.com/2026/06/showcase_confusion_matrix-3.png)
+![Haplogroup classification confusion matrix. 23 of 26 rows have near-zero diagonal entries, the signature of partial class collapse.](http://rokpayprsizors.files.wordpress.com/2026/06/showcase_confusion_matrix-4.png?w=1200)
 
 The 3 active classes are the haplogroups with the largest representation in the training windows. After sliding a 512-token window across the training genomes with stride 256, haplogroup H dominates the dataset. H haplogroup is the most common European lineage, and HmtDB overrepresents European sequences. The two other active classes are similarly high-frequency.
 
@@ -75,7 +75,7 @@ This is not a reason to declare the approach wrong. It's a statement about what'
 
 The fine-tuned accuracy is 1.83%. The zero-shot k-NN accuracy, using the pre-trained embeddings with no fine-tuning at all, is approximately **50%** on the same 26-class problem.
 
-![Zero-shot k-NN vs fine-tuned haplogroup classification accuracy. The pre-trained embeddings, with no task-specific training, outperform the fine-tuned classifier by 27x.](http://rokpayprsizors.files.wordpress.com/2026/06/knn_haplogroup_accuracy-3.png)
+![Zero-shot k-NN vs fine-tuned haplogroup classification accuracy. The pre-trained embeddings, with no task-specific training, outperform the fine-tuned classifier by 27x.](http://rokpayprsizors.files.wordpress.com/2026/06/knn_haplogroup_accuracy-4.png?w=1200)
 
 These two numbers measure completely different things.
 
