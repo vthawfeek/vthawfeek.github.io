@@ -1,7 +1,7 @@
 ---
 title: "What a First-of-Its-Kind Foundation Model Looks Like When Built in 4 Weeks on a Laptop"
-date: 2026-06-04
-tags: [mtDNA, foundation model, bioinformatics, machine learning, BERT]
+date: 2026-06-09
+tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
 
@@ -23,7 +23,7 @@ Result: approximately 50% accuracy on 26-class haplogroup classification. Random
 
 This number means the pre-training produced a representation space where evolutionarily related sequences land near each other, based entirely on sequence patterns. The 117,000 cross-species vertebrate genomes in Phase 1 pre-training, combined with 35,000 human-specific sequences in Phase 2, produced embeddings where haplogroup structure is recoverable without a single labeled example.
 
-![t-SNE projection of haplogroup embeddings. Phylogenetically related haplogroups cluster together with no fine-tuning.](http://rokpayprsizors.files.wordpress.com/2026/06/showcase_tsne.png)
+![t-SNE projection of haplogroup embeddings. Phylogenetically related haplogroups cluster together with no fine-tuning.](http://rokpayprsizors.files.wordpress.com/2026/06/showcase_tsne-4.png?w=1200)
 
 The structure also shows in the error patterns. The haplogroups the model confuses are phylogenetically adjacent. L0 gets confused with L1 (adjacent branches on the African root). H gets confused with HV (H is derived from HV; they share most of the defining variants). The errors that don't appear are cross-clade: no African root haplogroups (L0-L5) getting confused with European tip haplogroups (H, J, T). That phylogenetic error structure is not something a model could fake by memorizing sequence frequencies. It reflects real embedding geometry.
 
@@ -35,7 +35,7 @@ The second experiment that wasn't in the original plan: what happens when you fe
 
 No ancient sequences were in the training data. No labels were provided about sequence age or archaic status. The model saw the sequences the same way it sees any other mtDNA input: tokenize, embed, pool.
 
-![UMAP showing Neanderthal and Denisovan sequences placed outside modern human variation. No ancient DNA was included in training.](http://rokpayprsizors.files.wordpress.com/2026/06/showcase_ancient_dna_umap.png)
+![UMAP showing Neanderthal and Denisovan sequences placed outside modern human variation. No ancient DNA was included in training.](http://rokpayprsizors.files.wordpress.com/2026/06/showcase_ancient_dna_umap-4.png?w=1200)
 
 Neanderthal (NC_011137.1, Vindija Cave) and Denisovan (FR695060.1, Altai) ended up outside the modern human distribution. In L2 distance, modern humans average 0.0749 apart from each other. Neanderthal sits 0.1110 from the modern human center, Denisovan at 0.1070. Ancient sequences are 1.45-1.48 times farther from modern humans than modern humans are from each other.
 
@@ -55,7 +55,7 @@ mtDNA encodes 13 protein-coding genes, 22 tRNA genes, and 2 rRNA genes. The trai
 
 When embedding windows across the genome and coloring by gene type, the three functional categories form distinct clusters in t-SNE and UMAP projections.
 
-![Gene-type recovery: protein-coding, tRNA, and rRNA genes form separate clusters in embedding space without any functional annotation in training.](http://rokpayprsizors.files.wordpress.com/2026/06/showcase_gene_type_recovery.png) This is a signature of what MLM pre-training learns: k-mer frequency distributions differ systematically between protein-coding, tRNA, and rRNA regions. The model captured this distributional difference as structure in the embedding space.
+![Gene-type recovery: protein-coding, tRNA, and rRNA genes form separate clusters in embedding space without any functional annotation in training.](http://rokpayprsizors.files.wordpress.com/2026/06/showcase_gene_type_recovery-4.png?w=1200) This is a signature of what MLM pre-training learns: k-mer frequency distributions differ systematically between protein-coding, tRNA, and rRNA regions. The model captured this distributional difference as structure in the embedding space.
 
 The same phenomenon appears in pre-trained language models recovering syntax without syntactic labels. The pre-training task didn't ask the model to distinguish gene types. The gene types differ in their sequence statistics, and the model learned those differences in the process of learning to predict masked k-mers.
 
@@ -69,7 +69,7 @@ This is a compute problem, not an architecture problem. Each training epoch take
 
 The model shows partial class collapse: 3 of 26 classes are predicted, 23 of 26 are ignored. Inverse-frequency class weights were applied and moved the collapse from 1 class to 3. More gradient steps would continue to resolve this. An A100 GPU session running for about 50 minutes total would cover the full 50-epoch fine-tuning run.
 
-The pathogenicity evaluation was not completed. MtDNAForVariantPathogenicity was built (LoRA r=4, binary head), but the labeled evaluation dataset mapping ClinVar variant calls to model-ready inputs was not assembled before the project sprint ended. The AUROC reported in the showcase notebook (0.877) is for haplogroup-derived labels used as a proxy metric, not a direct pathogenicity benchmark.
+The pathogenicity evaluation was not completed. MtDNAForVariantPathogenicity was built (LoRA r=4, binary head), but the labeled evaluation dataset mapping ClinVar variant calls to model-ready inputs was not assembled before the project sprint ended. The AUROC figure shown in the showcase notebook is computed against haplogroup-derived proxy labels, not a direct pathogenicity benchmark.
 
 The training data carries a geographic bias: HmtDB is approximately 60-70% European haplogroups. This affects zero-shot accuracy on rare haplogroups and the distribution of fine-tuning examples across the 26 classes.
 
@@ -100,3 +100,4 @@ Gradio demo (haplogroup prediction, pathogenicity prediction, embedding visualiz
 Full code, DVC pipeline, notebooks, and evaluation scripts: [github.com/vthawfeek/mtdna-foundation-model](https://github.com/vthawfeek/mtdna-foundation-model)
 
 The model is usable today for zero-shot embedding and k-NN classification. Fine-tuning convergence requires GPU compute that was not available for this sprint. The pathogenicity head needs its evaluation dataset before it can be benchmarked honestly. Both of those are known, fixable gaps.
+<!-- published: https://rokpayprsizors.wordpress.com/2026/06/04/what-a-first-of-its-kind-foundation-model-looks-like-when-built-in-4-weeks-on-a-laptop/ -->
