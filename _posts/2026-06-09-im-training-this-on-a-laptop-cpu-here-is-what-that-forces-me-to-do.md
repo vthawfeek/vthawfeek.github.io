@@ -9,7 +9,7 @@ This project started with a constraint: no GPU budget. Not "I'll optimize later 
 
 That constraint shapes every decision about model size, data strategy, and what "pre-training" means in practice. This post is about those decisions, with the actual numbers.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t4-1.png?w=1200" alt="Pre-training loss curves for Phase 1 (cross-species) and Phase 2 (human-specific). Loss starts near the ln(4096) ≈ 8.32 random baseline." style="max-width:100%;height:auto;" />
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t4-3.png?w=1200" alt="Pre-training loss curves for Phase 1 (cross-species) and Phase 2 (human-specific). Loss starts near the ln(4096) ≈ 8.32 random baseline." style="max-width:100%;height:auto;" />
 
 ---
 
@@ -77,8 +77,6 @@ This is the same curriculum logic as large language models trained on broad inte
 MLM pre-training convergence on BERT-scale models typically requires tens of thousands of gradient steps. At my training speed, I can run approximately 1,300 steps per epoch, or roughly 2,600 steps total for a 2-epoch run.
 
 What does that buy? The loss starts near the random baseline of ln(4096) ≈ 8.32, which is what you get from uniform prediction across all 4,096 6-mers. After 2 epochs, the loss should decrease substantially, showing the model has learned something about sequence context. Zero-shot k-NN experiments on the Phase 1 checkpoint showed 16% accuracy versus 10% random. Meaningful signal, but not convergence.
-
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t4-2.png?w=1200" alt="Pre-training loss curves for Phase 1 (cross-species) and Phase 2 (human-specific). Loss starts near the ln(4096) ≈ 8.32 random baseline." style="max-width:100%;height:auto;" />
 
 What 2 epochs does not buy is fine-tuning convergence. LoRA fine-tuning on haplogroup classification or variant pathogenicity typically converges in 10-50 epochs. I ran 2 fine-tuning epochs. The math is: training loss dropped by a small amount from the baseline, which means the model was still in the early part of its learning curve when I stopped.
 
