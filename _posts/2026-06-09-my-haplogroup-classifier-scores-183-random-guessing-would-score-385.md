@@ -1,6 +1,6 @@
 ---
 title: "My Haplogroup Classifier Scores 1.83%. Random Guessing Would Score 3.85%."
-date: 2026-06-09
+date: 2026-06-15
 tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
@@ -10,6 +10,8 @@ After 2 epochs of LoRA fine-tuning on CPU, the 26-class haplogroup classifier ac
 This is not a misprint. The model is worse than flipping a coin across 26 options.
 
 Here's what the numbers actually mean, why it happened, and what survives despite the failure.
+
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t5.png?w=1200" alt="Haplogroup classification results: 1.83% fine-tuned accuracy vs 50% zero-shot k-NN, illustrating the compute gap between pre-training signal and fine-tuning convergence." style="max-width:100%;height:auto;" />
 
 ---
 
@@ -27,7 +29,7 @@ Below random is the signature of partial class collapse, not random noise. The m
 
 The confusion matrix is 26x26. Twenty-three of those rows are essentially empty, meaning none of those haplogroup classes were predicted at any meaningful frequency.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/showcase_confusion_matrix-5.png?w=1200" alt="Haplogroup classification confusion matrix. 23 of 26 rows have near-zero diagonal entries, the signature of partial class collapse." style="max-width:100%;height:auto;" />
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/showcase_confusion_matrix-6.png?w=1200" alt="Haplogroup classification confusion matrix. 23 of 26 rows have near-zero diagonal entries, the signature of partial class collapse." style="max-width:100%;height:auto;" />
 
 The 3 active classes are the haplogroups with the largest representation in the training windows. After sliding a 512-token window across the training genomes with stride 256, haplogroup H dominates the dataset. H haplogroup is the most common European lineage, and HmtDB overrepresents European sequences. The two other active classes are similarly high-frequency.
 
@@ -75,7 +77,7 @@ This is not a reason to declare the approach wrong. It's a statement about what'
 
 The fine-tuned accuracy is 1.83%. The zero-shot k-NN accuracy, using the pre-trained embeddings with no fine-tuning at all, is approximately **50%** on the same 26-class problem.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/knn_haplogroup_accuracy-5.png?w=1200" alt="Zero-shot k-NN vs fine-tuned haplogroup classification accuracy. The pre-trained embeddings, with no task-specific training, outperform the fine-tuned classifier by 27x." style="max-width:100%;height:auto;" />
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/knn_haplogroup_accuracy-6.png?w=1200" alt="Zero-shot k-NN vs fine-tuned haplogroup classification accuracy. The pre-trained embeddings, with no task-specific training, outperform the fine-tuned classifier by 27x." style="max-width:100%;height:auto;" />
 
 These two numbers measure completely different things.
 
