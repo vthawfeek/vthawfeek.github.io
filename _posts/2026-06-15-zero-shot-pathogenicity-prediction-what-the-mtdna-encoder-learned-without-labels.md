@@ -5,9 +5,9 @@ tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
 
-I built a pathogenicity predictor for mitochondrial DNA variants. The adapter weights exist. The training loop ran. But the model was trained on synthetic data — no real ClinVar variants, no real gnomAD allele frequencies. I wrote about that gap [in an earlier version of this post](https://rokpayprsizors.wordpress.com/2026/06/04/i-built-a-pathogenicity-predictor-i-dont-have-the-data-to-evaluate-it/).
+I built a pathogenicity predictor for mitochondrial DNA variants. The LoRA fine-tuning adapter exists — but it was trained on synthetic pathogenicity labels, a placeholder for real ClinVar and gnomAD data that was never assembled during the project sprint. Whether that adapter generalises to real variants is an open question.
 
-Then I ran the evaluation. Not fine-tuning — something more interesting: a zero-shot test of what the pre-trained encoder already knows about variant pathogenicity, with no labeled training examples at all.
+But before fine-tuning there is a more interesting question: does the pre-trained encoder already know something about pathogenicity? The encoder was trained on real cross-species vertebrate mtDNA through masked language modeling — no pathogenicity labels, no disease databases, just sequence. The test: embed real ClinVar pathogenic variants and real gnomAD common variants using the pre-trained encoder alone, then ask whether the embeddings separate.
 
 **AUROC = 0.777** (95% CI: 0.731–0.821).
 
