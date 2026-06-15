@@ -1,6 +1,6 @@
 ---
 title: "What I'd Do Differently If I Built mtDNA-FM Again"
-date: 2026-06-09
+date: 2026-06-15
 tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
@@ -28,6 +28,8 @@ I built the pathogenicity prediction architecture (MtDNAForVariantPathogenicity,
 This is backwards. The right order is: define what evaluation success looks like, assemble the labeled dataset, then build toward it. I had the ClinVar download code, the gnomAD variant files, the model architecture. What I didn't have was a labeled dataset that mapped ClinVar variant calls to specific genomic windows in a format the model could evaluate against. By the time I got to evaluation on Day 19, the honest result was: architecture built, no evaluation prepared.
 
 The lesson is not "do more work." It is "work in a different order." If I started tomorrow, I'd spend Day 1 building the pathogenicity evaluation file, running a random baseline, and understanding what an informative confusion matrix would look like. Then I'd build the model to beat that baseline. Scope everything else around the one thing that can be evaluated end-to-end.
+
+*Update: a zero-shot k-NN evaluation was subsequently run using real ClinVar + gnomAD data — AUROC=0.777 (95% CI 0.731–0.821). The lesson still stands: evaluation-first discipline would have caught the data pipeline bugs (ClinVar chromosome naming, gnomAD AF field name differences) earlier and shaped architecture choices differently.*
 
 ---
 
