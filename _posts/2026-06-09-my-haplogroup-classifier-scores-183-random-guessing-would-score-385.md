@@ -1,7 +1,7 @@
 ---
 title: "My Haplogroup Classifier Scores 1.83%. Random Guessing Would Score 3.85%."
 date: 2026-06-15
-tags: [mtDNA, foundation model, bioinformatics]
+tags: [mtDNA, foundation model, bioinformatics, haplogroup, fine-tuning]
 layout: post
 ---
 
@@ -11,7 +11,7 @@ This is not a misprint. The model is worse than flipping a coin across 26 option
 
 Here's what the numbers actually mean, why it happened, and what survives despite the failure.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t5.png?w=1200" alt="Haplogroup classification results: 1.83% fine-tuned accuracy vs 50% zero-shot k-NN, illustrating the compute gap between pre-training signal and fine-tuning convergence." style="max-width:100%;height:auto;" />
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t5-1.png?w=1200" alt="Haplogroup classification results: 1.83% fine-tuned accuracy vs 50% zero-shot k-NN, illustrating the compute gap between pre-training signal and fine-tuning convergence." style="max-width:100%;height:auto;" />
 
 ---
 
@@ -29,7 +29,7 @@ Below random is the signature of partial class collapse, not random noise. The m
 
 The confusion matrix is 26x26. Twenty-three of those rows are essentially empty, meaning none of those haplogroup classes were predicted at any meaningful frequency.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/showcase_confusion_matrix-6.png?w=1200" alt="Haplogroup classification confusion matrix. 23 of 26 rows have near-zero diagonal entries, the signature of partial class collapse." style="max-width:100%;height:auto;" />
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/showcase_confusion_matrix-7.png?w=1200" alt="Haplogroup classification confusion matrix. 23 of 26 rows have near-zero diagonal entries, the signature of partial class collapse." style="max-width:100%;height:auto;" />
 
 The 3 active classes are the haplogroups with the largest representation in the training windows. After sliding a 512-token window across the training genomes with stride 256, haplogroup H dominates the dataset. H haplogroup is the most common European lineage, and HmtDB overrepresents European sequences. The two other active classes are similarly high-frequency.
 
@@ -46,12 +46,19 @@ But class weighting addresses the loss gradient at each step. It doesn't make co
 The weights were computed from the actual training window counts:
 
 ```python
-class_counts = torch.bincount(torch.tensor([w["label"] for w in train_ds._windows]))
-class_weights = 1.0 / (class_counts.float() + 1e-6)
-class_weights = class_weights / class_weights.sum()
+label_tensor = torch.tensor([w["label"] for w in train_ds._windows])
+class_counts = torch.bincount(label_tensor, minlength=n_labels).float()
+class_weights = len(train_ds) / (n_labels * (class_counts + 1e-6))
 ```
 
-The resulting weights ranged from 0.975 to 1.680. The ratio between the most and least common classes is about 1.7x, which is mild by the standards of real-world class imbalance (ratios of 100:1 are common in clinical datasets). For a 26-class problem where the rarest class has dozens of representatives and the most common class has thousands of windows, 1.7x weighting is not enough to overcome the gradient pressure from majority classes in the first few epochs.
+This is the sklearn-style balanced weighting: `n / (K × count_k)`, where n is the total number of training windows, K is the number of classes, and count_k is the number of windows for class k. Weights are not normalised to sum to 1 — they're kept in natural units near 1.0 for balanced classes and scale inversely with count.
+
+The training set contained 1,267 sequences distributed across 26 classes. Most classes had exactly 50 sequences. The rarest were haplogroup E (29 sequences) and L5 (38 sequences). Because all human mitochondrial genomes are the same length (~16,569 bp), the sliding-window procedure produces approximately the same number of windows per sequence (~63 windows at stride 256). Window counts therefore scale linearly with sequence counts:
+
+- Most common classes (50 sequences): ~3,150 windows → weight ≈ 1.005
+- Haplogroup E (29 sequences): ~1,827 windows → weight ≈ 1.733
+
+The resulting weights ranged from 0.975 to 1.680 — a 1.7x ratio driven by the 50/29 ≈ 1.72× difference in sequence counts between the most and least represented haplogroups. For a classification task that needs 10 to 50 epochs of gradient updates to converge, a 1.7x loss penalty on minority classes shifts the gradient marginally but does not change the number of epochs required for the decision boundary to separate.
 
 The weights were correctly computed and applied. The problem is that "correctly applying class weights" is not the same as "running enough epochs to converge."
 
@@ -77,7 +84,7 @@ This is not a reason to declare the approach wrong. It's a statement about what'
 
 The fine-tuned accuracy is 1.83%. The zero-shot k-NN accuracy, using the pre-trained embeddings with no fine-tuning at all, is approximately **50%** on the same 26-class problem.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/knn_haplogroup_accuracy-6.png?w=1200" alt="Zero-shot k-NN vs fine-tuned haplogroup classification accuracy. The pre-trained embeddings, with no task-specific training, outperform the fine-tuned classifier by 27x." style="max-width:100%;height:auto;" />
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/knn_haplogroup_accuracy-7.png?w=1200" alt="Zero-shot k-NN vs fine-tuned haplogroup classification accuracy. The pre-trained embeddings, with no task-specific training, outperform the fine-tuned classifier by 27x." style="max-width:100%;height:auto;" />
 
 These two numbers measure completely different things.
 
