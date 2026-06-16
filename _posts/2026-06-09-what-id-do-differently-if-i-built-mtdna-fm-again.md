@@ -9,7 +9,7 @@ I'm at the end of a 25-day sprint building a foundation model for mitochondrial 
 
 This isn't a clean retrospective on a finished, polished project. It's what I'd actually change before starting the next iteration.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t7.png?w=1200" alt="Six lessons from building mtDNA-FM: evaluation order, compute planning, task scope, dataset bias, ablations, and baselines." style="max-width:100%;height:auto;" />
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t7-1.png?w=1200" alt="Six lessons from building mtDNA-FM: evaluation order, compute planning, task scope, dataset bias, ablations, and baselines." style="max-width:100%;height:auto;" />
 
 ---
 
