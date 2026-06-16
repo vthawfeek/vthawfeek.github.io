@@ -1,6 +1,6 @@
 ---
 title: "What I'd Do Differently If I Built mtDNA-FM Again"
-date: 2026-06-15
+date: 2026-06-16
 tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
@@ -8,6 +8,8 @@ layout: post
 I'm at the end of a 25-day sprint building a foundation model for mitochondrial DNA on a laptop CPU. The model is trained, the weights are on HuggingFace, the demo is live. And there are six decisions I'd reverse if I started this tomorrow.
 
 This isn't a clean retrospective on a finished, polished project. It's what I'd actually change before starting the next iteration.
+
+<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t7.png?w=1200" alt="Six lessons from building mtDNA-FM: evaluation order, compute planning, task scope, dataset bias, ablations, and baselines." style="max-width:100%;height:auto;" />
 
 ---
 
