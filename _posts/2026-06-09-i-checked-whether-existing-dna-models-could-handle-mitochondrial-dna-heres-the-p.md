@@ -4,7 +4,6 @@ date: 2026-06-09
 tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
-
 Before writing a single line of model code, the honest question to ask is: does a new model actually need to exist?
 
 DNA foundation models are not rare. DNABERT2 was trained on multi-species genomes and handles variable-length sequences. HyenaDNA processes sequences up to 1 million base pairs with sub-quadratic attention. Nucleotide Transformer used 850 billion nucleotides from across the tree of life. These are not toy systems. If any of them can be fine-tuned on mitochondrial DNA without architectural modification, that is the right path.
@@ -23,7 +22,7 @@ All three models also accept a single discrete base (or k-mer) at each position.
 
 Mitochondrial DNA is different on all of these axes simultaneously.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t2_image-6.png?w=1200" alt="mtDNA vs nDNA: circular junction at positions 1/16,569 with heteroplasmy illustration (mutant and wild-type copies), and base composition profiles showing mtDNA's non-uniform 44% GC vs nDNA's uniform 41% GC." style="max-width:100%;height:auto;" />
+![mtDNA vs nDNA: circular junction at positions 1/16,569 with heteroplasmy illustration (mutant and wild-type copies), and base composition profiles showing mtDNA's non-uniform 44% GC vs nDNA's uniform 41% GC.](../docs/figures/t2_image.png)
 
 ---
 
@@ -35,7 +34,7 @@ For a model using linear positional encoding, position 0 and position 16,568 are
 
 The D-loop control region sits directly at this junction. The D-loop spans approximately positions 576 to 16,024, wrapping across the position-1/position-16,569 boundary. Both promoters for transcription and the origin of heavy-strand replication are in this region. The functional unit straddles the place where linearisation creates a gap.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/pe_comparison-12.png?w=1200" alt="Linear PE (left) treats positions 1 and 16,569 as maximally dissimilar (blue corner). Circular PE (right) correctly represents them as adjacent (red corner). The D-loop spans precisely this junction." style="max-width:100%;height:auto;" />
+![Linear PE (left) treats positions 1 and 16,569 as maximally dissimilar (blue corner). Circular PE (right) correctly represents them as adjacent (red corner). The D-loop spans precisely this junction.](../docs/figures/pe_comparison.png)
 
 What this means for attention: in the pre-trained representations, attention heads that learn to focus on functionally related positions in the D-loop would need to attend across the full sequence length. Sequence 1 (position 576) and sequence 2 (position 16,024) look like they are separated by most of the genome, when they are actually adjacent regulatory elements. The attention pattern for the D-loop region would be structurally incorrect in any model with linear positional encoding.
 
@@ -81,9 +80,10 @@ The three architecture-level failures I described are not addressable by fine-tu
 
 3. The pre-training distribution is calibrated to nuclear DNA. This is the only problem that fine-tuning directly addresses, but it would need to overcome two other structural failures to produce a useful model.
 
-Building from scratch is the right choice. The model does not need to be large. A 6-layer BERT encoder at 256 hidden dimensions is approximately 6 million parameters, small enough to pre-train on a laptop over a few days, large enough to capture 6-mer patterns across the 16,569 bp circular genome.
+Building from scratch is the right choice. The model does not need to be large. A 6-layer BERT encoder at 256 hidden dimensions is ~5.8 million parameters, small enough to pre-train on a laptop over a few days, large enough to capture 6-mer patterns across the 16,569 bp circular genome.
 
 The two non-standard components are: circular positional encoding (distance between positions wraps at the genome boundary, so pos 0 and pos 16,568 have a distance of 1, not 16,568) and a heteroplasmy projection channel in the input embedding layer. Everything else is standard BERT.
 
-Whether these two additions are worth the cost of not inheriting a large pre-trained checkpoint is the real question. The zero-shot experiments will answer it.
-<!-- published: https://rokpayprsizors.wordpress.com/2026/06/06/i-checked-whether-existing-dna-models-could-handle-mitochondrial-dna-heres-the-problem/ -->
+Whether these two additions are worth the cost of not inheriting a large pre-trained checkpoint is the real question. The zero-shot experiments answer it — see the update below.
+
+*Update (bioRxiv preprint):* DNABERT-2 was evaluated on the same zero-shot 5-NN haplogroup task. DNABERT-2 (117M parameters) scores 66.3% (Macro-F1 0.659). mtDNA-FM (5.8M parameters) scores 37.9% (95% CI 34.4–41.2%). The overall 28.4 percentage-point gap favors DNABERT-2 for most haplogroups. However, mtDNA-FM outperforms DNABERT-2 on haplogroups C (F1 0.632 vs 0.611), F (F1 0.716 vs 0.613), and E (F1 0.400 vs 0.222), all haplogroups whose diagnostic positions fall beyond DNABERT-2's 3,000 nt processing window — the first empirical confirmation that full-genome circular encoding provides a measurable advantage exactly where the topology argument predicts it should.

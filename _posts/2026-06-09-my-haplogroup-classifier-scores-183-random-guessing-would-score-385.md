@@ -4,14 +4,13 @@ date: 2026-06-15
 tags: [mtDNA, foundation model, bioinformatics, haplogroup, fine-tuning]
 layout: post
 ---
-
 After 2 epochs of LoRA fine-tuning on CPU, the 26-class haplogroup classifier achieves 1.83% accuracy on the held-out test set. Random guessing on 26 classes scores 3.85%. The classifier is below random.
 
 This is not a misprint. The model is worse than flipping a coin across 26 options.
 
 Here's what the numbers actually mean, why it happened, and what survives despite the failure.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t5-1.png?w=1200" alt="Haplogroup classification results: 1.83% fine-tuned accuracy vs 50% zero-shot k-NN, illustrating the compute gap between pre-training signal and fine-tuning convergence." style="max-width:100%;height:auto;" />
+![Haplogroup classification results: 1.83% fine-tuned accuracy vs 50% zero-shot k-NN, illustrating the compute gap between pre-training signal and fine-tuning convergence.](../docs/figures/t5.png)
 
 ---
 
@@ -29,7 +28,7 @@ Below random is the signature of partial class collapse, not random noise. The m
 
 The confusion matrix is 26x26. Twenty-three of those rows are essentially empty, meaning none of those haplogroup classes were predicted at any meaningful frequency.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/showcase_confusion_matrix-7.png?w=1200" alt="Haplogroup classification confusion matrix. 23 of 26 rows have near-zero diagonal entries, the signature of partial class collapse." style="max-width:100%;height:auto;" />
+![Haplogroup classification confusion matrix. 23 of 26 rows have near-zero diagonal entries, the signature of partial class collapse.](../docs/figures/showcase_confusion_matrix.png)
 
 The 3 active classes are the haplogroups with the largest representation in the training windows. After sliding a 512-token window across the training genomes with stride 256, haplogroup H dominates the dataset. H haplogroup is the most common European lineage, and HmtDB overrepresents European sequences. The two other active classes are similarly high-frequency.
 
@@ -82,15 +81,15 @@ This is not a reason to declare the approach wrong. It's a statement about what'
 
 ## What the zero-shot k-NN result says
 
-The fine-tuned accuracy is 1.83%. The zero-shot k-NN accuracy, using the pre-trained embeddings with no fine-tuning at all, is approximately **50%** on the same 26-class problem.
+The fine-tuned accuracy is 1.83%. The zero-shot k-NN accuracy, using the pre-trained embeddings with no fine-tuning at all, is approximately **50%** on an 8-haplogroup verification panel (12.5% random baseline; 4× lift). A subsequent rigorous evaluation on the full 26-class PhyloTree benchmark (per the bioRxiv preprint) gives **37.9% (95% CI 34.4–41.2%)** — 9.9× above the 3.85% random baseline for 26 classes.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/knn_haplogroup_accuracy-7.png?w=1200" alt="Zero-shot k-NN vs fine-tuned haplogroup classification accuracy. The pre-trained embeddings, with no task-specific training, outperform the fine-tuned classifier by 27x." style="max-width:100%;height:auto;" />
+![Zero-shot k-NN vs fine-tuned haplogroup classification accuracy. The pre-trained embeddings, with no task-specific training, outperform the fine-tuned classifier by 27x.](../docs/figures/knn_haplogroup_accuracy.png)
 
 These two numbers measure completely different things.
 
 The zero-shot k-NN test works like this: take the pre-trained encoder, embed every sequence into a 256-dimensional vector, and for each test sequence find its k nearest neighbours in the training set. Predict the majority haplogroup of those neighbours. No gradient updates. No labeled examples during training. No classifier head.
 
-50% accuracy on a 26-class problem, with 3.85% random baseline, means the pre-trained embeddings cluster phylogenetically related sequences near each other in 256-d space. The representation geometry reflects evolutionary structure. That's what the pre-training learned.
+50% accuracy on the 8-class verification panel, with 12.5% random baseline (4× lift), means the pre-trained embeddings cluster phylogenetically related sequences near each other in 256-d space. The representation geometry reflects evolutionary structure. That's what the pre-training learned.
 
 The fine-tuned classifier at 1.83% tells you: the LoRA adapter on top of those representations hasn't had enough gradient steps to decode the structure. The pre-trained representations are not the problem.
 
@@ -120,7 +119,6 @@ The architecture is correct. LoRA r=8 with 98,304 trainable parameters on a 6-la
 
 Running 50 epochs on an A100 would take approximately 25 minutes and would likely produce a functional classifier. The GPU compute costs for a single fine-tuning run at that scale are a few dollars. The barrier is not algorithmic, it's a small compute budget decision.
 
-The zero-shot k-NN at 50% accuracy is the real takeaway from this part of the project. The pre-training produced representations that know something true about mtDNA evolutionary structure, without ever seeing a haplogroup label. That's the result that validates the pre-training approach.
+The zero-shot k-NN result is the real takeaway from this part of the project: 37.9% on the full 26-class evaluation (50% on the 8-class verification panel). The pre-training produced representations that know something true about mtDNA evolutionary structure, without ever seeing a haplogroup label. That's the result that validates the pre-training approach.
 
 The 1.83% fine-tuned accuracy is an accurate report of what happened. The honest framing: it is the best result achievable in 11 hours of CPU time on a 26-class classification task that needs 270 hours to converge.
-<!-- published: https://rokpayprsizors.wordpress.com/2026/06/04/my-haplogroup-classifier-scores-1-83-random-guessing-would-score-3-85/ -->

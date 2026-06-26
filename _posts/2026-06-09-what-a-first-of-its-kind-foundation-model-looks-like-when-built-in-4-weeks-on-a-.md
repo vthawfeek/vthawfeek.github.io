@@ -4,14 +4,13 @@ date: 2026-06-16
 tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
-
 Here is what's real and verifiable from 25 days of work.
 
-Pre-trained weights are on HuggingFace at vthawfeek/mtdna-foundation-model. A two-tab Gradio demo is live at vthawfeek/mtdna-fm-demo on HF Spaces. The full DVC pipeline (9 stages, download through evaluation) is in the GitHub repo. The model is 6-layer BERT, 256 hidden dim, approximately 6M parameters, pre-trained on 152,484 genomes. It's not a checkpoint from a larger general model adapted for mitochondrial DNA. It was trained from scratch on mtDNA specifically.
+Pre-trained weights are on HuggingFace at vthawfeek/mtdna-foundation-model. A two-tab Gradio demo is live at vthawfeek/mtdna-fm-demo on HF Spaces. The full DVC pipeline (9 stages, download through evaluation) is in the GitHub repo. The model is 6-layer BERT, 256 hidden dim, ~5.8M parameters, pre-trained on 152,590 genomes. It's not a checkpoint from a larger general model adapted for mitochondrial DNA. It was trained from scratch on mtDNA specifically.
 
 That's the inventory. What follows is what the model actually shows, and where the honest gaps are.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t8.png?w=1200" alt="mtDNA-FM results summary: zero-shot k-NN 50% haplogroup accuracy, AUROC 0.777 pathogenicity, ancient DNA placement, and gene-type recovery without labels." style="max-width:100%;height:auto;" />
+![mtDNA-FM results summary: zero-shot k-NN 50% haplogroup accuracy, AUROC 0.777 pathogenicity, ancient DNA placement, and gene-type recovery without labels.](../docs/figures/t8.png)
 
 ---
 
@@ -21,11 +20,15 @@ The clearest signal from this project comes from an experiment that requires no 
 
 The setup: take the pre-trained encoder, embed a set of human mitochondrial DNA sequences, and run k-nearest-neighbor classification in embedding space. For a test sequence, find its k nearest neighbors in the training set, predict the majority haplogroup among those neighbors. No gradient updates. No task-specific labels. The model was never told which haplogroup any sequence belongs to.
 
-Result: approximately 50% accuracy on 26-class haplogroup classification. Random baseline is 3.85%.
+Zero-shot 5-NN evaluation on the full 26-class PhyloTree benchmark (757 test sequences, 1,509 training library): **37.9% (95% CI 34.4–41.2%)**, 9.9× above the 3.85% random baseline. An earlier 8-class verification panel gave approximately 50% (12.5% random baseline; 4× lift); the 26-class rigorous evaluation is the figure reported in the bioRxiv preprint.
 
-This number means the pre-training produced a representation space where evolutionarily related sequences land near each other, based entirely on sequence patterns. The 117,000 cross-species vertebrate genomes in Phase 1 pre-training, combined with 35,000 human-specific sequences in Phase 2, produced embeddings where haplogroup structure is recoverable without a single labeled example.
+For context, DNABERT-2 (117M parameters, general-purpose DNA model) scores 66.3% (Macro-F1 0.659) on the same task zero-shot — a 28.4 percentage-point gap. The gap is clade-specific, not uniform. African L haplogroups (L0–L5): mtDNA-FM average F1 0.692. West Eurasian haplogroups (H, HV, J, K, T, U, V, W, X): mtDNA-FM average F1 0.096 — a 7.2× within-model ratio. DNABERT-2's same ratio is 1.13×, meaning the West Eurasian failure is specific to mtDNA-FM, not inherent to the task difficulty.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/showcase_tsne-8.png?w=1200" alt="t-SNE projection of haplogroup embeddings. Phylogenetically related haplogroups cluster together with no fine-tuning." style="max-width:100%;height:auto;" />
+Three candidate mechanisms for the West Eurasian gap: (i) scale — 5.8M vs 117M parameters; (ii) tokenization — stride-1 6-mer tokenization creates ~16,569 highly autocorrelated tokens vs. DNABERT-2's ~500 BPE tokens; (iii) aggregation — mean-pooling across 65 windows dilutes position-specific signals by a factor of 65. mtDNA-FM outperforms DNABERT-2 on haplogroups C, F, and E, whose diagnostic positions fall beyond DNABERT-2's 3,000 nt processing window — confirming that full-genome circular encoding is an advantage where it matters.
+
+This number means the pre-training produced a representation space where evolutionarily related sequences land near each other, based entirely on sequence patterns. The 117,615 cross-species vertebrate genomes in Phase 1 pre-training, combined with 34,975 human-specific sequences in Phase 2, produced embeddings where haplogroup structure is recoverable without a single labeled example.
+
+![t-SNE projection of haplogroup embeddings. Phylogenetically related haplogroups cluster together with no fine-tuning.](../docs/figures/showcase_tsne.png)
 
 The structure also shows in the error patterns. The haplogroups the model confuses are phylogenetically adjacent. L0 gets confused with L1 (adjacent branches on the African root). H gets confused with HV (H is derived from HV; they share most of the defining variants). The errors that don't appear are cross-clade: no African root haplogroups (L0-L5) getting confused with European tip haplogroups (H, J, T). That phylogenetic error structure is not something a model could fake by memorizing sequence frequencies. It reflects real embedding geometry.
 
@@ -37,7 +40,7 @@ The second experiment that wasn't in the original plan: what happens when you fe
 
 No ancient sequences were in the training data. No labels were provided about sequence age or archaic status. The model saw the sequences the same way it sees any other mtDNA input: tokenize, embed, pool.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/showcase_ancient_dna_umap-8.png?w=1200" alt="UMAP showing Neanderthal and Denisovan sequences placed outside modern human variation. No ancient DNA was included in training." style="max-width:100%;height:auto;" />
+![UMAP showing Neanderthal and Denisovan sequences placed outside modern human variation. No ancient DNA was included in training.](../docs/figures/showcase_ancient_dna_umap.png)
 
 Neanderthal (NC_011137.1, Vindija Cave) and Denisovan (FR695060.1, Altai) ended up outside the modern human distribution. In L2 distance, modern humans average 0.0749 apart from each other. Neanderthal sits 0.1110 from the modern human center, Denisovan at 0.1070. Ancient sequences are 1.45-1.48 times farther from modern humans than modern humans are from each other.
 
@@ -57,7 +60,7 @@ mtDNA encodes 13 protein-coding genes, 22 tRNA genes, and 2 rRNA genes. The trai
 
 When embedding windows across the genome and coloring by gene type, the three functional categories form distinct clusters in t-SNE and UMAP projections.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/showcase_gene_type_recovery-8.png?w=1200" alt="Gene-type recovery: protein-coding, tRNA, and rRNA genes form separate clusters in embedding space without any functional annotation in training." style="max-width:100%;height:auto;" /> This is a signature of what MLM pre-training learns: k-mer frequency distributions differ systematically between protein-coding, tRNA, and rRNA regions. The model captured this distributional difference as structure in the embedding space.
+![Gene-type recovery: protein-coding, tRNA, and rRNA genes form separate clusters in embedding space without any functional annotation in training.](../docs/figures/showcase_gene_type_recovery.png) This is a signature of what MLM pre-training learns: k-mer frequency distributions differ systematically between protein-coding, tRNA, and rRNA regions. The model captured this distributional difference as structure in the embedding space.
 
 The same phenomenon appears in pre-trained language models recovering syntax without syntactic labels. The pre-training task didn't ask the model to distinguish gene types. The gene types differ in their sequence statistics, and the model learned those differences in the process of learning to predict masked k-mers.
 
@@ -121,4 +124,3 @@ Gradio demo (haplogroup prediction, genome embedding visualization): [huggingfac
 Full code, DVC pipeline, notebooks, and evaluation scripts: [github.com/vthawfeek/mtdna-foundation-model](https://github.com/vthawfeek/mtdna-foundation-model)
 
 The model is usable today for zero-shot embedding and k-NN classification. Fine-tuning convergence requires GPU compute that was not available for this sprint. The zero-shot pathogenicity evaluation (AUROC=0.777) established a strong pre-training baseline. Supervised LoRA fine-tuning on real ClinVar/gnomAD data remains future work.
-<!-- published: https://rokpayprsizors.wordpress.com/2026/06/04/what-a-first-of-its-kind-foundation-model-looks-like-when-built-in-4-weeks-on-a-laptop/ -->

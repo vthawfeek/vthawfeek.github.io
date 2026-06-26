@@ -4,7 +4,6 @@ date: 2026-06-15
 tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
-
 I built a pathogenicity predictor for mitochondrial DNA variants. The LoRA fine-tuning adapter exists — but it was trained on synthetic pathogenicity labels, a placeholder for real ClinVar and gnomAD data that was never assembled during the project sprint. Whether that adapter generalises to real variants is an open question.
 
 But before fine-tuning there is a more interesting question: does the pre-trained encoder already know something about pathogenicity? The encoder was trained on real cross-species vertebrate mtDNA through masked language modeling — no pathogenicity labels, no disease databases, just sequence. The test: embed real ClinVar pathogenic variants and real gnomAD common variants using the pre-trained encoder alone, then ask whether the embeddings separate.
@@ -13,7 +12,7 @@ But before fine-tuning there is a more interesting question: does the pre-traine
 
 This post is about what that number means, where it comes from, and why a pre-trained encoder trained purely on masked language modeling over vertebrate mitochondrial sequences would produce it without ever seeing a pathogenicity label.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t6.png?w=1200" alt="Zero-shot pathogenicity prediction: AUROC 0.777 from a pre-trained encoder with no pathogenicity labels, evaluated on ClinVar pathogenic variants vs gnomAD common variants." style="max-width:100%;height:auto;" />
+![Zero-shot pathogenicity prediction: AUROC 0.777 from a pre-trained encoder with no pathogenicity labels, evaluated on ClinVar pathogenic variants vs gnomAD common variants.](../docs/figures/t6.png)
 
 ---
 
@@ -134,4 +133,3 @@ The full pipeline components:
 - **Evaluation:** `mtdna_fm/evaluation/variant_eval.py` — `compute_metrics(y_true, y_score, positions)`
 
 The fine-tuning adapter architecture (`MtDNAForVariantPathogenicity`, LoRA r=4) is implemented in `mtdna_fm/model/model.py`. The training dataset class (`PathogenicityVariantDataset`) is in `mtdna_fm/data/variant_dataset.py`. Once a labeled training split exists, fine-tuning requires no changes to those components.
-<!-- published: https://rokpayprsizors.wordpress.com/2026/06/04/i-built-a-pathogenicity-predictor-i-dont-have-the-data-to-evaluate-it/ -->

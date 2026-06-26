@@ -4,18 +4,17 @@ date: 2026-06-14
 tags: [mtDNA, foundation model, bioinformatics]
 layout: post
 ---
-
 The core design question for this project is: how do you represent a circular genome with continuous heteroplasmy data using a standard BERT-style encoder? Each answer I settled on replaced something more obvious that I initially considered. Here are the four decisions that shaped the model, and what each one cost and gained.
 
 ---
 
 ## The Starting Point
 
-mtDNA-FM is a 6-layer BERT encoder, 8 attention heads, 256 hidden dimensions, approximately 6M parameters total. The vocabulary is 4,102 tokens: 4,096 6-mers plus 6 special tokens. If you squint, it looks like a small BERT.
+mtDNA-FM is a 6-layer BERT encoder, 8 attention heads, 256 hidden dimensions, approximately 5.8M parameters total. The vocabulary is 4,102 tokens: 4,096 6-mers plus 6 special tokens. If you squint, it looks like a small BERT.
 
 But three structural choices make it different from anything I could have downloaded off the shelf. None of them were obvious upfront.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/t3_1.png?w=1200" alt="mtDNA-FM architecture: 6-layer BERT encoder with circular positional encoding and heteroplasmy projection channel." style="max-width:100%;height:auto;" />
+![mtDNA-FM architecture: 6-layer BERT encoder with circular positional encoding and heteroplasmy projection channel.](../docs/figures/t3_1.png)
 
 ---
 
@@ -36,7 +35,7 @@ If you use standard sinusoidal PE on mtDNA, any attention head trying to model D
 
 The fix is one substitution. Replace the linear angle with a circular one. The difference shows clearly in the positional similarity matrix:
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/pe_comparison-14.png?w=1200" alt="Linear PE (left) vs circular PE (right): cosine similarity heatmaps across all 16,569 positions. Red boxes mark the position 1/16,569 junction. Circular PE makes these positions similar; linear PE makes them maximally dissimilar." style="max-width:100%;height:auto;" />
+![Linear PE (left) vs circular PE (right): cosine similarity heatmaps across all 16,569 positions. Red boxes mark the position 1/16,569 junction. Circular PE makes these positions similar; linear PE makes them maximally dissimilar.](../docs/figures/pe_comparison.png)
 
 
 ```python
@@ -115,11 +114,11 @@ The cost of 6-mers is a larger vocabulary than BPE would produce for equivalent 
 
 The reference BERT-base architecture is 12 layers, 768 hidden dimensions, 12 attention heads, approximately 110M parameters. DNABERT uses BERT-base. Nucleotide Transformer uses up to 2.5B parameters.
 
-I'm using 6 layers, 256 hidden dimensions, 8 attention heads, ~6M parameters. The reason is compute budget, and the calculation is explicit.
+I'm using 6 layers, 256 hidden dimensions, 8 attention heads, ~5.8M parameters. The reason is compute budget, and the calculation is explicit.
 
-A 12-layer, 768-dim BERT would have roughly 110M parameters. My model has 6M. The training time scales roughly with parameter count times the number of forward passes. On a CPU, a single forward-backward pass through my 6M model takes approximately 30 seconds per batch. Scaling to 110M parameters and holding everything else constant would push that to over 8 minutes per batch. A single pre-training epoch would take months.
+A 12-layer, 768-dim BERT would have roughly 110M parameters. My model has 5.8M. The training time scales roughly with parameter count times the number of forward passes. On a CPU, a single forward-backward pass through my 5.8M model takes approximately 30 seconds per batch. Scaling to 110M parameters and holding everything else constant would push that to over 8 minutes per batch. A single pre-training epoch would take months.
 
-The deeper question is whether 6M parameters is enough to learn useful representations of mtDNA. My prior is that it is, for this specific domain. mtDNA is a small, densely annotated genome. The sequence diversity is high enough across vertebrate species to provide a useful pre-training signal, but the total information content is far lower than the entire human transcriptome that large single-cell models are trained on. The representations I need are: which genomic region is this window from, what is the local sequence context, and how does the heteroplasmy level modify the expected signal. A 6-layer encoder has enough capacity to learn those.
+The deeper question is whether 5.8M parameters is enough to learn useful representations of mtDNA. My prior is that it is, for this specific domain. mtDNA is a small, densely annotated genome. The sequence diversity is high enough across vertebrate species to provide a useful pre-training signal, but the total information content is far lower than the entire human transcriptome that large single-cell models are trained on. The representations I need are: which genomic region is this window from, what is the local sequence context, and how does the heteroplasmy level modify the expected signal. A 6-layer encoder has enough capacity to learn those.
 
 Gradient checkpointing is also on by default, enabled via `model.gradient_checkpointing_enable()`. This halves peak memory usage by recomputing intermediate activations during the backward pass rather than storing them. It adds roughly 30% more compute time, but on CPU the bottleneck is the matrix multiplications, not memory bandwidth, so the practical slowdown is less than that.
 
@@ -135,9 +134,8 @@ The combination of circular PE, heteroplasmy channel, and 6-mer tokenization mea
 
 Starting from a random baseline of ln(4096) ≈ 8.32, the question is how far the loss drops, and whether the learned representations show meaningful structure, for example whether k-NN classifiers on the embeddings recover haplogroup labels without any supervision.
 
-<img src="http://rokpayprsizors.files.wordpress.com/2026/06/attention_heatmap_step0-6.png?w=1200" alt="Attention heatmap at training step 0. Even before pre-training, the circular positional encoding creates structured attention patterns across the genome." style="max-width:100%;height:auto;" />
+![Attention heatmap at training step 0. Even before pre-training, the circular positional encoding creates structured attention patterns across the genome.](../docs/figures/attention_heatmap_step0.png)
 
-The Phase 1 pre-training on 117,000 cross-species vertebrate mtDNA genomes builds broad representations of evolutionary conserved sequence patterns. Phase 2 on 35,000 human HmtDB genomes with het_weight=0.3 specializes those representations toward human-specific signal. The two-phase structure is the training strategy, which gets its own post.
+The Phase 1 pre-training on 117,000 cross-species vertebrate mtDNA genomes builds broad representations of evolutionary conserved sequence patterns. Phase 2 on 34,975 human HmtDB genomes with het_weight=0.3 specializes those representations toward human-specific signal. The two-phase structure is the training strategy, which gets its own post.
 
 The circular PE is the piece I expect will make the biggest difference relative to a generic BERT. Whether it does is an empirical question, and I've built ablation experiments to test it.
-<!-- published: https://rokpayprsizors.wordpress.com/2026/06/04/three-architecture-decisions-i-made-for-mtdna-fm-and-why-each-one-was-non-obvious/ -->
